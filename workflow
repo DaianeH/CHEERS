@@ -47,18 +47,29 @@ sed -i "s/ /\t/g" H3K27ac_ENCODE_counts_sums_nodecile.txt
 sed  -i '1i chr start end H1_Cell_Line  CD3_Primary_Cells_Peripheral_UW Peripheral_Blood_Mononuclear_Primary_Cells  Fetal_Muscle_Leg  Thymus  H1_BMP4_Derived_Mesendoderm_Cultured_Cells  CD4_Memory_Primary_Cells  Adipose_Nuclei  Fetal_Placenta  Spleen  H1_BMP4_Derived_Trophoblast_Cultured_Cells  CD4_Naive_Primary_Cells Aorta	Fetal_Stomach A549_EtOH_0.02pct_Lung_Carcinoma  H1_Derived_Mesenchymal_Stem_Cells 	Adult_Liver Fetal_Thymus  Dnd41_TCell_Leukemia  H1_Derived_Neuronal_Progenitor_Cultured_Cells CD4+_CD25-_CD45RO+_Memory_Primary_Cells Brain_Angular_Gyrus Gastric GM12878_Lymphoblastoid  H9_Cell_Line  CD4+_CD25-_IL17-_PMA-Ionomycin_stimulated_MACS_purified_Th_Primary_Cells  Brain_Anterior_Caudate  Left_Ventricle  HeLa-S3_Cervical_Carcinoma  hESC_Derived_CD184+_Endoderm_Cultured_Cells CD4+_CD25-_IL17+_PMA-Ionomcyin_stimulated_Th17_Primary_Cells  Brain_Cingulate_Gyrus Lung  HepG2_Hepatocellular_Carcinoma  hESC_Derived_CD56+_Ectoderm_Cultured_Cells  CD4+_CD25-_Th_Primary_Cells Brain_Hippocampus_Middle  Ovary HMEC_Mammary_Epithelial hESC_Derived_CD56+_Mesoderm_Cultured_Cells  CD4+_CD25+_CD127-_Treg_Primary_Cells  Brain_Inferior_Temporal_Lobe  Pancreas  HSMM_Skeletal_Muscle_Myoblasts  HUES48_Cell_Line  CD4+_CD25int_CD127+_Tmem_Primary_Cells  Brain_Mid_Frontal_Lobe  Placenta_Amnion HSMMtube_Skeletal_Muscle_Myotubes_Derived_from_HSMM HUES6_Cell_Line CD56_Primary_Cells  Brain_Substantia_Nigra  Psoas_Muscle  HUVEC_Umbilical_Vein_Endothelial_Cells  HUES64_Cell_Line  CD8_Naive_Primary_Cells Colonic_Mucosa  Rectal_Mucosa.Donor_29  K562_Leukemia IMR90_Cell_Line CD8_Memory_Primary_Cells  Colon_Smooth_Muscle	Rectal_Mucosa.Donor_31  Monocytes-CD14+_RO01746 iPS-18_Cell_Line  Chondrocytes_from_Bone_Marrow_Derived_Mesenchymal_Stem_Cell_Cultured_Cells  Duodenum_Smooth_Muscle  Rectal_Smooth_Muscle  NH-A_Astrocytes iPS-20b_Cell_Line	Mobilized_CD34_Primary_Cells_Female Esophagus Right_Atrium  NHDF-Ad_Adult_Dermal_Fibroblasts  iPS_DF_6.9_Cell_Line  Penis_Foreskin_Fibroblast_Primary_Cells_skin01  Fetal_Adrenal_Gland Right_Ventricle NHEK-Epidermal_Keratinocytes  iPS_DF_19.11_Cell_Line  Penis_Foreskin_Fibroblast_Primary_Cells_skin02  Fetal_Intestine_Large Sigmoid_Colon NHLF_Lung_Fibroblasts Bone_Marrow_Derived_Mesenchymal_Stem_Cell_Cultured_Cells  Penis_Foreskin_Keratinocyte_Primary_Cells_skin03  Fetal_Intestine_Small Skeletal_Muscle_Female  Osteoblasts CD14_Primary_Cells  Penis_Foreskin_Melanocyte_Primary_Cells_skin01  Pancreatic_Islets Small_Intestine CD19_Primary_Cells_Peripheral_UW  Penis_Foreskin_Melanocyte_Primary_Cells_skin03  Fetal_Muscle_Trunk  Stomach_Smooth_Muscle' H3K27ac_ENCODE_counts_sums_nodecile_TEST.txt
 
 
+#### Put all SNPs inside each chromosome directory
+
+#!/bin/bash
+for i in {1..22}
+do
+   n=1
+   while read line; do
+      # reading each line
+      mv results_ld_$line.txt chr$i/
+      n=$((n+1))
+   done < chr$i.txt
+done
+#from https://linuxhint.com/read_file_line_by_line_bash/ 
+
+### Several SNPs (191) were not found in the LD ref panel. Those are in the snps table.
+
+## LD files directory: /hpc/users/hemerd01/daiane/projects/BP/CHEERS/BP/ld
+
+## CHEERS_normalize.py
+
+## Re-run multicovar in order to have one file per sample:
+for file in /hpc/users/hemerd01/daiane/projects/BP/CHEERS/ENCODE/reads/*bam; do bedtools multicov -bams $file -bed /hpc/users/hemerd01/daiane/projects/BP/CHEERS/ENCODE/peaks/H3K27ac_ENCODE_peaks_merged.bed > $file_counts.txt;done
+
+/hpc/users/hemerd01/daiane/projects/BP/CHEERS/CHEERS_normalize.py --input DIRECTORYwithCOUNTS --prefix BP --outdir OUTDIR
 
 
-Link: 
-
-
-create_LD_blocks.py
-
-python /hpc/users/hemerd01/daiane/projects/BP/CHEERS/create_LD_blocks.py /hpc/users/hemerd01/daiane/projects/BP/CHEERS/gwas_for_input/BP_SNPs_CRCh37.txt /hpc/users/hemerd01/daiane/projects/BP/CHEERS/BP /hpc/users/hemerd01/daiane/projects/BP/CHEERS/ld
-
-
-Output:
-Parent directory is the name of the trait; within that directory there are subdirectories for all the chromosomes (chr1, chr2...) and within each of these there are .txt files named after the lead SNP (for example results_ld_rs9989735.txt). Each file contains all the SNPs in the LD with the lead (python indexing: snp name is at position 3, chr at position 0 and base pair information is at position 4)
-
-****
-python /hpc/users/hemerd01/hemerd01-old-home/daiane/projects/BP/CHEERS/create_LD_blocks.py /hpc/users/hemerd01/hemerd01-old-home/daiane/projects/BP/gwas_for_input/WHR_CHEERS.txt /hpc/users/hemerd01/hemerd01-old-home/daiane/projects/BP/CHEERS/CHEERS_output /hpc/users/hemerd01/hemerd01-old-home/daiane/projects/BP/CHEERS/CHEERS_output/ld
